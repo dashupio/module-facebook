@@ -2,13 +2,12 @@
 const { Module } = require('@dashup/module');
 
 // import base
-const Discord = require('discord.js');
-const DiscordConnect = require('./connects/discord');
+const FacebookConnect = require('./connects/facebook');
 
 /**
  * export module
  */
-class DiscordModule extends Module {
+class FacebookModule extends Module {
 
   /**
    * construct discord module
@@ -16,12 +15,6 @@ class DiscordModule extends Module {
   constructor() {
     // run super
     super();
-
-    // connect discord
-    this.building.then(() => {
-      // done
-      this.discord();
-    });
   }
   
   /**
@@ -38,35 +31,9 @@ class DiscordModule extends Module {
    */
   connects(register) {
     // register discord connect
-    register(DiscordConnect);
-  }
-
-  /**
-   * start discord logic
-   */
-  discord() {
-    // check discord
-    if (!this.config.token) return;
-
-    // load bot
-    this.bot = new Discord.Client();
-
-    // logging
-    this.logging = new Promise((resolve) => {
-      // resolve ready
-      this.bot.on('ready', resolve);
-    });
-
-    // login with secret
-    this.bot.login(this.config.token);
-
-    // on message
-    this.bot.on('message', (...args) => {
-      // emit here
-      this.emit('message', ...args);
-    });
+    register(FacebookConnect);
   }
 }
 
 // create new
-module.exports = new DiscordModule();
+module.exports = new FacebookModule();

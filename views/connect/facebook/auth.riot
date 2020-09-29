@@ -1,0 +1,29 @@
+<connect-facebook-auth>
+  <div class="flex-1 align-items-center d-flex">
+    <div class="fa fa-spinner fa-spin" />
+  </div>
+
+  <script>
+    /**
+     * export default
+     */
+    export default class ConnectFacebookAuth {
+
+      /**
+       * on client id
+       */
+      onMounted() {
+        // check frontend
+        if (typeof window === 'undefined') return;
+
+        // go to url
+        const redirect = `https://www.facebook.com/v8.0/dialog/oauth?client_id=${this.props.connect.clientID}&redirect_uri=${encodeURIComponent(
+          `https://${window.location.hostname}/connect/facebook`
+        )}&state=${this.props.page}:${this.props.connect.uuid}:${this.props.session}&response_type=code&scope=email`.split('\n').join('');
+
+        // window location
+        window.location.href = redirect;
+      }
+    }
+  </script>
+</connect-facebook-auth>
