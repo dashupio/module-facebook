@@ -1,20 +1,25 @@
 
 // import connect interface
 import fetch from 'node-fetch';
-import { Connect } from '@dashup/module';
+import { Struct } from '@dashup/module';
 
 /**
  * build address helper
  */
-export default class FacebookConnect extends Connect {
+export default class FacebookConnect extends Struct {
   /**
-   * construct facebook connector
+   * construct stripe connector
    *
    * @param args 
    */
   constructor(...args) {
     // run super
     super(...args);
+
+    // bind methods
+    this.saveAction = this.saveAction.bind(this);
+    this.confirmAction = this.confirmAction.bind(this);
+    this.sanitiseAction = this.sanitiseAction.bind(this);
   }
 
   /**
@@ -65,7 +70,11 @@ export default class FacebookConnect extends Connect {
    */
   get actions() {
     // return connect actions
-    return {};
+    return {
+      save     : this.saveAction,
+      confirm  : this.confirmAction,
+      sanitise : this.sanitiseAction,
+    };
   }
 
   /**
@@ -91,15 +100,54 @@ export default class FacebookConnect extends Connect {
    * @param connect 
    * @param data 
    */
-  async save({ req, dashup, sessionID }, connect) {
+  async saveAction({ req, dashup, connect : oldConnect }, connect = {}) {
+    // check dashup
+    if (!dashup) return;
+
+    // check secret
+    if (connect.secret === 'SECRET') {
+      // secret
+      connect.secret = oldConnect.secret;
+    }
+
+    // return connect
+    return { connect };
+  }
+
+  /**
+   * action method
+   *
+   * @param param0 
+   * @param connect 
+   * @param data 
+   */
+  async sanitiseAction({ req, dashup }, connect = {}) {
+    // check dashup
+    if (!dashup) return;
+
+    // delete
+    if (connect.secret) connect.secret = 'SECRET';
+
+    // return connect
+    return { connect };
+  }
+
+  /**
+   * action method
+   *
+   * @param param0 
+   * @param connect 
+   * @param data 
+   */
+  async confirmAction({ req, dashup, session }, connect) {
     // check dashup
     if (!dashup) return;
 
     // confirm
     const confirm = await fetch(`https://graph.facebook.com/v8.0/oauth/access_token?
-client_id=${connect.clientID}
+client_id=${connect.client}
 &redirect_uri=${encodeURIComponent(`${this.dashup.config.url}/connect/facebook`)}
-&client_secret=${connect.clientSecret}
+&client_secret=${connect.secret}
 &code=${req.body.code || req.query.code}`.split('\n').join(''));
     
     // await JSON
@@ -125,6 +173,9 @@ client_id=${connect.clientID}
         token   : access_token,
         expires : expires_in,
       }
-    }, connect, sessionID);
+    }, connect, session);
+
+    // return true
+    return true;
   }
 }
