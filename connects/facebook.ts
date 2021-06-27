@@ -61,8 +61,7 @@ export default class FacebookConnect extends Struct {
   get views() {
     // return object of views
     return {
-      auth   : 'connect/facebook/auth',
-      config : 'connect/facebook/config',
+      config : 'connect/facebook',
     };
   }
 
